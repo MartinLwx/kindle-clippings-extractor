@@ -3,6 +3,24 @@ from rich import print
 from collections import defaultdict
 
 
+class Clipping:
+    def __init__(self, highlight: str, note: str | None = None):
+        """The note may be empty."""
+        self.highlight = highlight
+        self.note = note
+
+    def add_note(self, note: str):
+        self.note = note
+
+    def __repr__(self):
+        """Return markdown format by default"""
+        return (
+            f"- {self.highlight}"
+            if not self.note
+            else f"- {self.highlight}\n    {self.note}"
+        )
+
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -13,7 +31,7 @@ def get_args():
     parser.add_argument(
         "--file",
         type=str,
-        help="the path of My Clipping.txt",
+        help="the path of My Clippings.txt",
     )
 
     return parser.parse_args()
@@ -24,18 +42,22 @@ def read(path: str) -> str:
         return f.read()
 
 
-def retrieve_by_title(content: str, title: str) -> list[str]:
+def retrieve_by_title(content: str, title: str) -> list[Clipping]:
     component = content.split("=" * 10 + "\n")
-    highlights = defaultdict(list)
+    highlights: dict[str, list[Clipping]] = defaultdict(list)
     for comp in component:
         if comp == "":
             continue
-        infos, highlight = comp.split("\n\n")
-        if highlight.strip() == "":
+        infos, undecided = comp.split("\n\n")
+        if undecided.strip() == "":
             continue
-        highlight = highlight.strip()  # remove "\n" in both sides
-        book_title, _ = infos.split("\n")
-        highlights[book_title].append(highlight)
+        undecided = Clipping(undecided.strip())  # remove "\n" in both sides
+        book_title, meta_info = infos.split("\n")
+        # highlight or notes?
+        if "笔记" in meta_info:
+            highlights[book_title][-1].add_note(undecided)
+        elif "标注" in meta_info:
+            highlights[book_title].append(undecided)
 
     while True:
         candidates = [book_title for book_title in highlights if title in book_title]
@@ -54,19 +76,13 @@ def retrieve_by_title(content: str, title: str) -> list[str]:
             )
 
 
-def markdownize(lines: list[str]) -> list[str]:
-    """Currently, This function only add a leading `- ` to all lines"""
-    return ["- " + s for s in lines]
-
-
 def main():
     args = get_args()
     all_clippings = read(args.file)
     highlights = retrieve_by_title(all_clippings, args.title)
-    ans = markdownize(highlights)
 
     with open(f"{args.title}.md", "w") as out:
-        out.write("\n".join(ans))
+        out.write("\n".join([str(x) for x in highlights]))
 
 
 if __name__ == "__main__":

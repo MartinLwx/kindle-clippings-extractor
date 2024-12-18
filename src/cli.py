@@ -65,27 +65,31 @@ def retrieve_by_title(content: str, title: str) -> list[Clipping]:
             continue
         undecided = Clipping(undecided.strip())  # remove "\n" in both sides
         book_title, meta_info = infos.split("\n")
-        # highlight or notes?
+        # FIXME: multilingual support
         if "笔记" in meta_info:
             highlights[book_title][-1].add_note(undecided)
         elif "标注" in meta_info:
             highlights[book_title].append(undecided)
 
-    while True:
-        candidates = [book_title for book_title in highlights if title in book_title]
-        if len(candidates) > 1:
-            print(
-                "[red underline]These books match your input, please provide a more specific title."
+    candidates = [book_title for book_title in highlights if title in book_title]
+
+    if len(candidates) > 1:
+        print(
+            "[red underline]These books match your input, please provide a more specific title."
+        )
+        print(
+            "\n".join(
+                [f":books: {idx}. [green]{line}" for idx, line in enumerate(candidates)]
             )
-            print("\n".join([f":books:[green]{line}" for line in candidates]))
-            user_input = input("Which book do you want to extract?\n")
-            title = user_input.strip()
-        elif len(candidates) == 1:
-            return highlights[candidates[0]]
-        else:
-            print(
-                "[red]No matching books found, please provide the correct book title."
-            )
+        )
+        book_id = int(
+            input("Which book do you want to extract? (give the index please)\n")
+        )
+        return highlights[candidates[book_id]]
+    elif len(candidates) == 1:
+        return highlights[candidates[0]]
+    else:
+        print("[red]No matching books found, please provide the correct book title.")
 
 
 def main():

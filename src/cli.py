@@ -22,18 +22,24 @@ class Clipping:
 
 
 def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--title",
-        type=str,
-        help="the title of the book you want to extract",
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
         "--file",
         type=str,
         help="the path of My Clippings.txt",
     )
-
+    parser.add_argument(
+        "--title",
+        type=str,
+        required=True,
+        help=(
+            "part of the books's title\n"
+            "1. If there are multiple matches, this program will let you decide one\n"
+            "2. The extracted clippings will be saved to {title}.md by default"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -43,6 +49,12 @@ def read(path: str) -> str:
 
 
 def retrieve_by_title(content: str, title: str) -> list[Clipping]:
+    """
+    Args:
+        content: the content of ./My Clippings.txt file
+        title: the book title you want to extract
+    """
+    # NOTE: each highlight/note is separated by a continuous "="
     component = content.split("=" * 10 + "\n")
     highlights: dict[str, list[Clipping]] = defaultdict(list)
     for comp in component:

@@ -10,10 +10,12 @@ Get the file path of `My Clippings.txt`, and then pass it to `--file`. It will a
 
 ```sh
 $ python src/cli.py -h
-usage: cli.py [-h] [--title TITLE] [--file FILE]
+usage: cli.py [-h] [--file FILE] --title TITLE
 
 options:
   -h, --help     show this help message and exit
-  --title TITLE  the title of the book you want to extract
   --file FILE    the path of My Clippings.txt
+  --title TITLE  part of the books's title
+                 1. If there are multiple matches, this program will let you decide one
+                 2. The extracted clippings will be saved to {title}.md by default
 ```

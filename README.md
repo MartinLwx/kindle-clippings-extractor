@@ -9,7 +9,7 @@ I like reading using Kindle and adding highlights for later review. That's the r
 Get the file path of `My Clippings.txt`, and then pass it to `--file`. It will analyze all the clippings within this file and return the highlights you want. The default behavior is saving the highlights to a file named `{title}.md` (the `title` here is equal to your `--title`)
 
 ```sh
-$ python src/cli.py -h
+$ uv src/cli.py -h
 usage: cli.py [-h] [--file FILE] --title TITLE
 
 options:
